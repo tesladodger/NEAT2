@@ -13,24 +13,27 @@
  *     {@link com.tesladodger.neat.GenomeBuilder}, which will give you a starting genome
  *     that respects the requirements of the rest of the library. You can also create a
  *     starting genome manually, creating the nodes and connections separately and adding them
- *     to the template genome.</li>
+ *     to the template genome.
+ *
+ *     <li>Tweak the values in {@link com.tesladodger.neat.utils.Parameters}. The default
+ *     parameters are general purpose and should be changed according to population size, genome
+ *     size and, ultimately, the requirements of the problem.
  *
  *     <li>Generate the first population. You can use the method
  *     {@link com.tesladodger.neat.Population#spawn(com.tesladodger.neat.Genome, int)}, supplying
  *     the created template genome, which will return a list of genomes with the same topology
- *     and random weights.</li>
+ *     and random weights.
  *
  *     <li>Run the simulation as you like with the provided genomes. The output of the neural
  *     network is calculated in the method
  * {@link com.tesladodger.neat.Genome#calculateOutput(double[], com.tesladodger.neat.utils.functions.ActivationFunction)}.
  *     At the end of the simulation, set the fitness of each genome according to the results of
- *     the simulation ({@link com.tesladodger.neat.Genome#setFitness(double)}).</li>
+ *     the simulation ({@link com.tesladodger.neat.Genome#setFitness(double)}).
  *
  *     <li>Generate the next generation, using
- *     {@link com.tesladodger.neat.Population#nextGeneration(java.util.List, com.tesladodger.neat.utils.InnovationHistory)} )}.
- *     </li>
+ *     {@link com.tesladodger.neat.Population#nextGeneration(java.util.List, com.tesladodger.neat.utils.InnovationHistory)}.
  *
- *     <li>Repeat the last two steps until a solution is achieved or you give up.</li>
+ *     <li>Repeat the last two steps until a solution is achieved or you give up.
  * </ul>
  *
  * There is also provided in this library a class to draw a genome using {@link javax.swing}, for
@@ -38,6 +41,5 @@
  * the {@link com.tesladodger.neat.tools} package).
  *
  * @author tesla
- * @version 1.0
  */
 package com.tesladodger.neat;

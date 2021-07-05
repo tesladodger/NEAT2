@@ -167,9 +167,9 @@ public class MutationTest {
             }
         }
 
-        assertEquals(400, weightMutationCount, 50);
-        assertEquals(300, nodeMutationCount, 50);
-        assertEquals(300, connectionMutationCount, 50);
+        assertEquals(400, weightMutationCount, 60);
+        assertEquals(300, nodeMutationCount, 60);
+        assertEquals(300, connectionMutationCount, 60);
 
         int[] nm = new int[] {nm03, nm15, nm24, nm53, nm54};
         System.out.println("node mutations: " + Arrays.toString(nm));

@@ -10,6 +10,7 @@ import com.tesladodger.neat.utils.structures.ConnectionHashTable;
 import com.tesladodger.neat.utils.structures.NodeList;
 
 import java.util.Random;
+import java.util.function.Function;
 
 
 /**
@@ -17,7 +18,6 @@ import java.util.Random;
  * weights.
  *
  * @author tesla
- * @version 1.0
  */
 public class Mutation {
 
@@ -45,7 +45,7 @@ public class Mutation {
     public static boolean mutate (Genome genome, InnovationHistory history, Parameters p, Random rand) {
         double r = rand.nextDouble();
         if (r <= p.connectionWeightsMutationProbability) {
-            return mutateWeights(genome, p, rand);
+            return mutateWeights(genome, history, p, rand);
         } else if (r <= p.connectionWeightsMutationProbability + p.newNodeMutationProbability) {
             return addNodeMutation(genome, history, rand);
         } else if (r <= p.connectionWeightsMutationProbability + p.newNodeMutationProbability +
@@ -283,20 +283,30 @@ public class Mutation {
      *
      * <p>A connection will be assigned a new random value according to
      * {@link Parameters#newRandomWeightValueProbability}. Otherwise, its weight will be normally
-     * perturbed. The standard deviation of the perturbation is set by
-     * {@link Parameters#weightMutationPower}.
+     * perturbed. The standard deviation of the perturbation is a parameter which can depend on
+     * the age of the connection (how many generations it has existed for).
      *
      * @param genome to mutate;
+     * @param history innovation history;
      * @param p parameters;
      * @param rand random instance;
      *
      * @return {@code true} if the weights of the genome have been mutated, {@code false} if
      * there are no connections to mutate;
+     * @see Parameters#weightMutationPower
+     * @see Parameters#mutateRecentGenesBias
+     * @see Parameters#mutateRecentGenesAgeCutoff
+     * @see Parameters#mutateRecentGenesSizeThreshold
      */
-    public static boolean mutateWeights (Genome genome, Parameters p, Random rand) {
+    public static boolean mutateWeights (Genome genome, InnovationHistory history, Parameters p,
+                                         Random rand) {
         if (genome.getConnections().isEmpty()) {
             return false;
         }
+
+        Function<Integer, Double> powerFunction = EvolutionUtils.calculateMutationPowerFunction(p,
+                genome.getConnections().size());
+
         for (Connection con : genome.getConnections().asArray()) {
             double r = rand.nextDouble();
             if (r <= p.newRandomWeightValueProbability) {
@@ -305,7 +315,9 @@ public class Mutation {
                         * range + p.weightLowerBound);
             } else {
                 double normalOffset = rand.nextGaussian();
-                con.setWeight(con.getWeight() + normalOffset * p.weightMutationPower);
+                int age = history.getConnectionAge(con.getInNodeId(), con.getOutNodeId());
+                double power = powerFunction.apply(age);
+                con.setWeight(con.getWeight() + normalOffset * power);
             }
         }
         return true;

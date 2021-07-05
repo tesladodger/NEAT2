@@ -21,7 +21,6 @@ import java.util.Random;
  * crossover without loosing information.
  *
  * @author tesla
- * @version 1.0
  */
 public class Crossover {
 

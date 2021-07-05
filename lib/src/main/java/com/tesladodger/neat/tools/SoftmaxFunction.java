@@ -11,17 +11,16 @@ import com.tesladodger.neat.utils.functions.ActivationFunction;
  * to use it for something else!
  *
  * @author tesla
- * @version 1.0
  */
 public class SoftmaxFunction {
 
     /**
      * Base of the exponent.
      *
-     * <p>If <it>0 < base < 1</it>, smaller input components will result in larger output
+     * <p>If {@code 0 < base < 1}, smaller input components will result in larger output
      * probabilities, and decreasing the value of {@code base} will create probability
      * distributions that are more concentrated around the positions of the smallest input
-     * values. Conversely, if <it>base > 1</it>, larger input components will result in larger
+     * values. Conversely, if {@code base > 1}, larger input components will result in larger
      * output probabilities, and increasing the value of {@code base} will create probability
      * distributions that are more concentrated around the positions of the largest input values.
      */

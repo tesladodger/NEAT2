@@ -11,7 +11,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
@@ -24,8 +23,6 @@ public class NodeTest {
         assertEquals(2, node.getId());
         assertEquals(Node.Type.INPUT, node.getType());
         assertEquals("Node{id=2, type=INPUT, layer=0}", node.toString());
-
-        assertThrows(IllegalArgumentException.class, () -> new Node(-1, Node.Type.INPUT));
     }
 
     @Test

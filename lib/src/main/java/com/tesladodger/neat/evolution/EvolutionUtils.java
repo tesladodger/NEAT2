@@ -3,7 +3,10 @@ package com.tesladodger.neat.evolution;
 import com.tesladodger.neat.Connection;
 import com.tesladodger.neat.Genome;
 import com.tesladodger.neat.Node;
+import com.tesladodger.neat.utils.Parameters;
 import com.tesladodger.neat.utils.structures.NodeList;
+
+import java.util.function.Function;
 
 
 class EvolutionUtils {
@@ -43,5 +46,38 @@ class EvolutionUtils {
                 }
             }
         }
+    }
+
+    /**
+     * The power function differentiates mutation power given the connections age (how many
+     * generations it has existed for).
+     *
+     * <p>The input is the age of the connection and the output is the mutation power.
+     *
+     * @param p parameters;
+     * @param genomeSize number of connections in the genome;
+     *
+     * @return function;
+     * @see Parameters#weightMutationPower
+     * @see Parameters#mutateRecentGenesBias
+     * @see Parameters#mutateRecentGenesAgeCutoff
+     * @see Parameters#mutateRecentGenesSizeThreshold
+     * @since v1.1
+     */
+    protected static Function<Integer, Double> calculateMutationPowerFunction (Parameters p,
+                                                                      double genomeSize) {
+        Function<Integer, Double> result;
+        double cutoff = p.mutateRecentGenesAgeCutoff, bias = p.mutateRecentGenesBias, power = p.weightMutationPower;
+        if (p.mutateRecentGenesAgeCutoff <= 0 ||
+                p.mutateRecentGenesBias == 0 ||
+                genomeSize < p.mutateRecentGenesSizeThreshold) {
+            result = (x) -> p.weightMutationPower;
+        } else {
+            double a = bias / Math.pow(cutoff, 2);
+            result = (x) -> (x < cutoff) ?
+                    a * Math.pow(x - cutoff, 2) + power:
+                    power;
+        }
+        return result;
     }
 }

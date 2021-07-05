@@ -6,18 +6,14 @@ import com.tesladodger.neat.utils.functions.ActivationFunction;
 
 /**
  * Represents a connection between two {@link Node}s, from an in-node to an out-node. Has a
- * weight, which represents the strength of the connection.
+ * weight, which represents the strength of the connection, and a flag to determine if this
+ * connection is enabled or not.
  *
  * @author tesla
- * @version 1.0
  */
 public class Connection implements Cloneable, Comparable<Connection> {
 
-    /**
-     * Historical marking to facilitate crossover.
-     *
-     * @see InnovationHistory
-     */
+    /** Historical marking to facilitate crossover. */
     private final int innovationNumber;
 
     /** Id of the input node. */

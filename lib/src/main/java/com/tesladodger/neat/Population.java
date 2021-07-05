@@ -22,7 +22,6 @@ import java.util.concurrent.ThreadLocalRandom;
  * potential number of offspring is assigned to it.
  *
  * @author tesla
- * @version 1.0
  */
 public class Population {
 
@@ -76,10 +75,11 @@ public class Population {
     }
 
     /**
-     * Create a group of {@link Genome}s, generated from a given template. The topology is the
-     * same (same number of nodes and connections), but the weights of the connections will be
-     * randomly assigned in the range given by {@link Parameters#weightLowerBound} and
-     * {@link Parameters#weightUpperBound}.
+     * Create a group of {@link Genome}s, generated from a given template.
+     *
+     * <p>The topology is the same (same number of nodes and connections), but the weights of the
+     * connections will be randomly assigned in the range given by
+     * {@link Parameters#weightLowerBound} and {@link Parameters#weightUpperBound}.
      *
      * <p>{@link ThreadLocalRandom} is used to set the weights of the connections of the created
      * genomes.
@@ -94,10 +94,11 @@ public class Population {
     }
 
     /**
-     * Create a group of {@link Genome}s, generated from a given template. The topology is the
-     * same (same number of nodes and connections), but the weights of the connections will be
-     * randomly assigned in the range given by {@link Parameters#weightLowerBound} and
-     * {@link Parameters#weightUpperBound}.
+     * Create a group of {@link Genome}s, generated from a given template.
+     *
+     * <p>The topology is the same (same number of nodes and connections), but the weights of the
+     * connections will be randomly assigned in the range given by
+     * {@link Parameters#weightLowerBound} and {@link Parameters#weightUpperBound}.
      *
      * @param template genome in whose structure the returned genomes will be based;
      * @param size number of genomes to return;
@@ -114,7 +115,9 @@ public class Population {
 
         while (--size > 0) {
             Genome g = template.clone();
-            Mutation.mutateWeights(g, params, rand);
+            // since the probability of perturbing weights is 0, it's ok to call this with null
+            // history and power function
+            Mutation.mutateWeights(g, null, params, rand);
             result.add(g);
         }
 

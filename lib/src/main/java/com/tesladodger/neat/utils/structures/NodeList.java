@@ -2,7 +2,6 @@ package com.tesladodger.neat.utils.structures;
 
 import com.tesladodger.neat.Node;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,7 +12,6 @@ import java.util.NoSuchElementException;
  * Special purpose Singly-Linked List that stores ordered Nodes.
  *
  * @author tesla
- * @version 1.0
  */
 public class NodeList implements Iterable<Node> {
 
@@ -67,9 +65,9 @@ public class NodeList implements Iterable<Node> {
     }
 
     /**
-     * Get an unmodifiable list containing all the outputs in this list.
+     * Returns a collection containing all the outputs in this list.
      *
-     * @return list of outputs
+     * @return list of outputs;
      */
     public List<Node> getOutputs () {
         List<Node> result = new LinkedList<>();
@@ -78,7 +76,7 @@ public class NodeList implements Iterable<Node> {
                 result.add(n);
             }
         }
-        return Collections.unmodifiableList(result);
+        return result;
     }
 
     /**
@@ -129,7 +127,7 @@ public class NodeList implements Iterable<Node> {
     /**
      * Returns a shallow copy of this list as a Node[].
      *
-     * @return Node[] with the elements of this list;
+     * @return array with the elements of this list;
      */
     public Node[] asArray () {
         Node[] result = new Node[size];
@@ -145,6 +143,59 @@ public class NodeList implements Iterable<Node> {
      */
     public boolean isEmpty () {
         return size == 0;
+    }
+
+    /**
+     * Returns an iterator for this list's nodes.
+     *
+     * <p>The order of the returned nodes is the one established by the
+     * {@link Node#compareTo(Node)} method.
+     *
+     * @return iterator for this list;
+     */
+    @Override
+    public Iterator<Node> iterator () {
+        return new NodeListIterator();
+    }
+
+    /**
+     * Iterator for {@link NodeList}. Only supports {@code next}.
+     */
+    private class NodeListIterator implements Iterator<Node> {
+        private Member next;
+
+        private NodeListIterator () {
+            next = root;
+        }
+
+        @Override
+        public boolean hasNext () {
+            return next != null;
+        }
+
+        @Override
+        public Node next () {
+            if (!hasNext()) {
+                throw new NoSuchElementException("The iterator has no next element.");
+            }
+
+            Node result = next.node;
+            next = next.next;  // nice
+            return result;
+        }
+    }
+
+    /**
+     * Represents a member of this list. Contains a Node and a reference to the next member.
+     */
+    private static class Member {
+        private final Node node;
+        private Member next;
+
+        private Member (Node node, Member next) {
+            this.node = node;
+            this.next = next;
+        }
     }
 
     @Override
@@ -178,60 +229,6 @@ public class NodeList implements Iterable<Node> {
                 return sb.append(']').toString();
             }
             sb.append(',').append(' ');
-        }
-    }
-
-    /**
-     * Returns an iterator for this list's nodes.
-     *
-     * <p>The order of the returned nodes is the one established by the
-     * {@link Node#compareTo(Node)} method.
-     *
-     * @return iterator for this list;
-     */
-    @Override
-    public Iterator<Node> iterator () {
-        return new NodeListIterator(root);
-    }
-
-    /**
-     * Represents a member of this list. Contains a Node and a reference to the next member.
-     */
-    private static class Member {
-
-        private final Node node;
-        private Member next;
-
-        private Member (Node node, Member next) {
-            this.node = node;
-            this.next = next;
-        }
-    }
-
-    /**
-     * Iterator for {@link NodeList}. Only supports {@code next}.
-     */
-    private static class NodeListIterator implements Iterator<Node> {
-
-        private Member next;
-
-        private NodeListIterator (Member root) {
-            next = root;
-        }
-
-        @Override
-        public boolean hasNext () {
-            return next != null;
-        }
-
-        @Override
-        public Node next () {
-            if (!hasNext()) {
-                throw new NoSuchElementException("The iterator has no next element.");
-            }
-            Node result = next.node;
-            next = next.next;  // nice
-            return result;
         }
     }
 }

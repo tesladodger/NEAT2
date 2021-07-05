@@ -7,7 +7,6 @@ import java.util.Random;
  * Useful operations on arrays.
  *
  * @author tesla
- * @version 1.0
  */
 public class Arrays {
 

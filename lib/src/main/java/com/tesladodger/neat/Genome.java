@@ -17,13 +17,21 @@ import java.util.Random;
 /**
  * Represents the genome topology: a list of {@link Node}s and {@link Connection}s.
  *
+ * <p>The nodes have layers, starting at 0 for the input nodes and incrementing up to the outputs.
+ * This helps ordering the nodes for feed-forward: the process of propagating the input across
+ * the network.
+ *
+ * <p>After feeding forward, the values of the nodes are cleared. Since this genome supports
+ * recursive connections - from a node in a higher layer to a node in a lower one, or from a node
+ * to itself - the values of nodes stemming from recursive connections is saved, and will be
+ * added in the next feed-forward.
+ *
  * <p>The actual topology choices are not a responsibility of this class. For example, using a
  * Bias node is a choice the client has to make, always taking care to set its input to 1.
  *
- * @author tesla
- * @version 1.0
  * @see Node
  * @see Connection
+ * @author tesla
  */
 public class Genome implements Cloneable, Comparable<Genome> {
 
@@ -45,11 +53,9 @@ public class Genome implements Cloneable, Comparable<Genome> {
     public Genome () {
         nodes = new NodeList();
         connections = new ConnectionHashTable(10);
-
         inputNum = 0;
         outputNum = 0;
         hiddenNum = 0;
-
         fitness = 0;
     }
 
@@ -118,15 +124,42 @@ public class Genome implements Cloneable, Comparable<Genome> {
      * @param input array of inputs;
      * @param function activation function;
      *
-     * @return array with outputs, ordered by the order the nodes were inserted;
-     *
-     * @throws IllegalArgumentException if length of input array doesn't correspond to number of
-     * input nodes;
+     * @return array with outputs, ordered by node id;
+     * @throws IllegalArgumentException if the length of input array doesn't correspond to the
+     * number of input nodes in this genome;
+     * @see Genome#calculateRawOutput(double[], ActivationFunction)
      */
     public double[] calculateOutput (double[] input, ActivationFunction function) {
-        if (input.length != inputNum)
+        double[] result = calculateRawOutput(input, function);
+        for (int i = 0; i < result.length; i++) {
+            result[i] = function.apply(result[i]);
+        }
+        return result;
+    }
+
+    /**
+     * Performs propagation of the inputs through the network.
+     *
+     * <p>Unlike {@link Genome#calculateOutput(double[], ActivationFunction)}, the activation
+     * function isn't applied to the output nodes. Thus the raw output values can be passed to a
+     * multi-dimensional normalization function, like the
+     * {@link com.tesladodger.neat.tools.SoftmaxFunction}.
+     *
+     * @param input array of inputs;
+     * @param function activation function;
+     *
+     * @return array with outputs, ordered by node id;
+     * @throws IllegalArgumentException if the length of the input array doesn't correspond to
+     * the number of input nodes in this genome;
+     * @see Genome#calculateOutput(double[], ActivationFunction)
+     * @since v1.1
+     */
+    public double[] calculateRawOutput (double[] input, ActivationFunction function) {
+        if (input.length != inputNum) {
             throw new IllegalArgumentException("Length of input array [" + input.length + "] does" +
                     " not correspond to number of input nodes [" + inputNum + "].");
+        }
+
         int in = 0;
         int out = 0;
         double[] result = new double[outputNum];
@@ -138,7 +171,7 @@ public class Genome implements Cloneable, Comparable<Genome> {
                 }
                 case HIDDEN -> propagateFromNode(node, function);
                 case OUTPUT -> {
-                    result[out++] = node.getOutput(function);
+                    result[out++] = node.getOutput(x -> x);
                     // propagate from the outputs, because there might be backward connections
                     propagateFromNode(node, function);
                 }

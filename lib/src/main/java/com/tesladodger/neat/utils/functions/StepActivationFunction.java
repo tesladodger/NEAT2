@@ -8,7 +8,6 @@ package com.tesladodger.neat.utils.functions;
  * {@link StepActivationFunction#lowValue}.
  *
  * @author tesla
- * @version 1.0
  */
 public class StepActivationFunction implements ActivationFunction {
 

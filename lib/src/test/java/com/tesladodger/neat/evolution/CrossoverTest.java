@@ -4,6 +4,7 @@ import com.tesladodger.neat.Connection;
 import com.tesladodger.neat.Genome;
 import com.tesladodger.neat.Node;
 import com.tesladodger.neat.utils.Parameters;
+import com.tesladodger.neat.utils.functions.ActivationFunction;
 import com.tesladodger.neat.utils.structures.NodeList;
 
 import org.junit.jupiter.api.RepeatedTest;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
@@ -580,11 +582,11 @@ public class CrossoverTest {
         Node n2 = new Node(2, Node.Type.OUTPUT, 2);
         Genome parent = new Genome().addNodes(n0, n1, n2);
 
-        Connection c0 = new Connection(0, 0, 2);
+        Connection c0 = new Connection(0, 0, 2, 0.2);
         Connection c1 = new Connection(1, 1, 2, 0.0, false);
-        Connection c2 = new Connection(2, 1, 3);
-        Connection c3 = new Connection(3, 3, 4);
-        Connection c4 = new Connection(4, 4, 2);
+        Connection c2 = new Connection(2, 1, 3, -.6);
+        Connection c3 = new Connection(3, 3, 4, .4);
+        Connection c4 = new Connection(4, 4, 2, -.1);
         Genome child = new Genome().addConnections(c0, c1, c2, c3, c4);
 
         Crossover.addNodesToChild(child, parent);
@@ -595,10 +597,12 @@ public class CrossoverTest {
                 "Node{id=4, type=HIDDEN, layer=2}, " +
                 "Node{id=2, type=OUTPUT, layer=3}" +
                 "]", child.getNodes().toString());
-    }
 
-    @Test
-    public void childFunctionalityTest () {
-        // TODO test if the child is functional
+        ActivationFunction f = x -> x;
+
+        assertArrayEquals(new double[] {0.2072},
+                child.calculateOutput(new double[] {1, .3}, f), 0.00001);
+        assertArrayEquals(new double[] {-0.952},
+                child.calculateOutput(new double[] {-5, 2}, f), 0.00001);
     }
 }

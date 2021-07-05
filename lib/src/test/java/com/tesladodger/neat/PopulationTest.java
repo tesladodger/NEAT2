@@ -86,6 +86,33 @@ public class PopulationTest {
         }
     }
 
+    /**
+     * Spawn test for large genomes.
+     */
+    @Test
+    public void spawnTest2 () {
+        Parameters params = new Parameters();
+        params.averageWeightDifferenceCompatibilityCoefficient = 0.0f;
+        params.disjointGenesCompatibilityCoefficient = 100f;
+        params.excessGenesCompatibilityCoefficient = 100f;
+
+        Population p = new Population(params);
+        InnovationHistory h = new InnovationHistory();
+        Genome g = new GenomeBuilder(h)
+                .setNumberOfNodes(20, 20)
+                .setFullyConnected(true)
+                .build();
+
+        LinkedList<Genome> gs = p.spawn(g, 50);
+
+        assertEquals(50, gs.size());
+
+        for (Genome genome : gs) {
+            assertEquals(0.0, Genome.compatibilityBetween(g, genome, params), 0.00001);
+            assertEquals(0.0, Genome.compatibilityBetween(genome, g, params), 0.00001);
+        }
+    }
+
     @Test
     public void speciateTest0 () {
         Genome g0 = new Genome();

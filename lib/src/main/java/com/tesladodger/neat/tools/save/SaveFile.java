@@ -27,7 +27,6 @@ import java.util.List;
  * hundred cars go around a track."
  *
  * @author tesla
- * @version 1.0
  */
 public class SaveFile {
 

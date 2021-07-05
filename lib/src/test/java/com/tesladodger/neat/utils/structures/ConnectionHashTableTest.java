@@ -19,6 +19,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ConnectionHashTableTest {
 
     @Test
+    public void testAddException () {
+        Connection cFail = new Connection(0, -1, 0);
+        assertThrows(IllegalArgumentException.class,
+                () -> new ConnectionHashTable().addConnection(cFail));
+    }
+
+    @Test
     public void testGet () {
         Connection c1 = new Connection(1, 0, 3);
         Connection c2 = new Connection(2, 0, 4);

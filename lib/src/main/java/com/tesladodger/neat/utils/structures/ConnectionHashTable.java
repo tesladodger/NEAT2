@@ -7,23 +7,24 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.NoSuchElementException;
 
 
 /**
- * Special purpose {@code hash table}, that returns all {@link Connection}s departing from a
- * given node id. Not having to search for every connection that departs from a node, which is a
- * necessary operation for {@link com.tesladodger.neat.Genome#calculateOutput}, for all nodes,
+ * Special purpose {@code table}, that returns all {@link Connection}s departing from a given
+ * node id.
+ *
+ * <p>Not having to search for every connection that departs from a node, which is a necessary
+ * operation for {@link com.tesladodger.neat.Genome#calculateOutput}, for all nodes,
  * significantly reduces the time complexity of that method.
  *
  * <p>There's no actual hashing involved, the in-node id of the connection is the key, so the
- * size of table should be equal to the number of nodes in the genome, plus 40% to account for
- * mutation. For this reason, node IDs should start at 0 and be incremented, so that an array out
- * of bounds exception is avoided and no indexes are wasted in the internal array. The structure
- * will grow if needed, but it's best to prevent
- * that since it's expensive.
+ * size of table should be equal to the node id in the genome, plus 40% to account for mutation.
+ * For this reason, node IDs should start at 0 and be incremented, so that an array out of bounds
+ * exception is avoided and no indexes are wasted in the internal array. The structure will grow
+ * if needed, but it's best to prevent that since it's expensive.
  *
  * @author tesla
- * @version 1.0
  */
 public class ConnectionHashTable {
 
@@ -65,7 +66,7 @@ public class ConnectionHashTable {
      * @param initialCapacity of this table;
      */
     public ConnectionHashTable (int initialCapacity) {
-        int initialSize = Math.max(14, initialCapacity+1);
+        int initialSize = Math.max(DEFAULT_CAPACITY, initialCapacity+1);
         buckets = new ConnectionBucket[initialSize];
         orderedConnections = new LinkedList<>();
         size = 0;
@@ -75,6 +76,8 @@ public class ConnectionHashTable {
      * Add a connection to this table.
      *
      * @param connection to add;
+     *
+     * @throws IllegalArgumentException if the connection has a negative innovation number;
      */
     public void addConnection (Connection connection) {
         addConnection0(connection);
@@ -86,9 +89,14 @@ public class ConnectionHashTable {
      * Add a new connection to the buckets.
      *
      * @param con connection to add;
+     *
+     * @throws IllegalArgumentException if the connection has a negative in-node id;
      */
     void addConnection0 (Connection con) {
         int index = con.getInNodeId();
+        if (index < 0) {
+            throw new IllegalArgumentException("Illegal innovation number [" + index + "].");
+        }
         if (index >= buckets.length) {
             increaseCapacity((int) (index + (index * .4)));
         }
@@ -142,16 +150,16 @@ public class ConnectionHashTable {
     }
 
     /**
-     * Get an iterator for the connections in this table with the given id.
+     * Get an iterable containing the connections in this table that departed from the node with
+     * the given node id.
      *
      * @param inNodeId to get connections from;
      *
-     * @return iterator for connections, empty if there are none;
+     * @return iterable with desired connections, empty if there are none;
      */
     public Iterable<Connection> getConnectionsFrom (int inNodeId) {
         return inNodeId >= capacity() || buckets[inNodeId] == null ?
-                new ConnectionBucket() :
-                buckets[inNodeId];
+                new ConnectionBucket() : buckets[inNodeId];
     }
 
     /**
@@ -164,7 +172,7 @@ public class ConnectionHashTable {
      * otherwise;
      */
     public boolean containsConnection (int inNodeId, int outNodeId) {
-        if (inNodeId >= capacity() || buckets[inNodeId] == null) {
+        if (isEmpty() || inNodeId >= capacity() || buckets[inNodeId] == null) {
             return false;
         }
         for (Connection c : buckets[inNodeId]) {
@@ -177,6 +185,8 @@ public class ConnectionHashTable {
 
     /**
      * Get the {@link Connection}s on this table in an array.
+     *
+     * <p>The returned connections are ordered by innovation number.
      *
      * <p>The caller is free to modify the array without modifying this table.
      *
@@ -219,6 +229,65 @@ public class ConnectionHashTable {
         return size == 0;
     }
 
+    /**
+     * Group of connections that have the same in-node.
+     *
+     * <p>Implemented as singly-linked list, only supports iterating over the elements.
+     *
+     * <p>No particular order is imposed to the elements returned by the iterator.
+     */
+    static class ConnectionBucket implements Iterable<Connection> {
+        private ConnectionBucketElement root;
+        int size;
+
+        private void add (Connection con) {
+            root = new ConnectionBucketElement(con, root);
+            size++;
+        }
+
+        @Override
+        public Iterator<Connection> iterator () {
+            return new ConnectionBucketIterator();
+        }
+
+        private class ConnectionBucketIterator implements Iterator<Connection> {
+            private ConnectionBucketElement next;
+
+            private ConnectionBucketIterator () {
+                next = root;
+            }
+
+            @Override
+            public boolean hasNext () {
+                return next != null;
+            }
+
+            @Override
+            public Connection next () {
+                if (next == null) {
+                    throw new NoSuchElementException("The iterator has no next element.");
+                }
+
+                Connection value = next.value;
+                next = next.next;  // nice
+                return value;
+            }
+        }
+
+        /**
+         * An element in a bucket: contains a value and a reference to the next element.
+         */
+        static class ConnectionBucketElement {
+            private final Connection value;
+            private final ConnectionBucketElement next;
+
+            private ConnectionBucketElement (Connection value, ConnectionBucketElement next) {
+                this.value = value;
+                this.next = next;
+            }
+        }
+    }
+
     @Override
     public boolean equals (Object o) {
         if (this == o) return true;
@@ -250,64 +319,6 @@ public class ConnectionHashTable {
                 return sb.append(']').toString();
             }
             sb.append(',').append(' ');
-        }
-    }
-
-    /**
-     * Group of connections that have the same in-node.
-     *
-     * <p>Implemented as singly-linked list, only supports iterating over the elements.
-     *
-     * <p>No particular order is imposed to the elements returned by the iterator.
-     */
-    static class ConnectionBucket implements Iterable<Connection> {
-
-        private ConnectionBucketElement root;
-
-        int size;
-
-        private void add (Connection con) {
-            root = new ConnectionBucketElement(con, root);
-            size++;
-        }
-
-        @Override
-        public Iterator<Connection> iterator () {
-            return new ConnectionBucketIterator(root);
-        }
-
-        static class ConnectionBucketIterator implements Iterator<Connection> {
-
-            private ConnectionBucketElement next;
-
-            private ConnectionBucketIterator (ConnectionBucketElement root) {
-                next = root;
-            }
-
-            @Override
-            public boolean hasNext () {
-                return next != null;
-            }
-
-            @Override
-            public Connection next () {
-                Connection value = next.value;
-                next = next.next;  // nice
-                return value;
-            }
-        }
-
-        /**
-         * An element in a bucket: contains a value and a reference to the next element.
-         */
-        static class ConnectionBucketElement {
-            private final Connection value;
-            private final ConnectionBucketElement next;
-
-            private ConnectionBucketElement (Connection value, ConnectionBucketElement next) {
-                this.value = value;
-                this.next = next;
-            }
         }
     }
 }

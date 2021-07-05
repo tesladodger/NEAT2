@@ -4,6 +4,7 @@ import com.tesladodger.neat.utils.InnovationHistory;
 import com.tesladodger.neat.evolution.Mutation;
 import com.tesladodger.neat.utils.Parameters;
 import com.tesladodger.neat.utils.exceptions.IllegalTopologyException;
+import com.tesladodger.neat.utils.functions.ActivationFunction;
 import com.tesladodger.neat.utils.functions.SigmoidActivationFunction;
 import com.tesladodger.neat.utils.functions.StepActivationFunction;
 
@@ -613,7 +614,6 @@ public class GenomeTest {
         assertArrayEquals(new double[] {0.0179},
                 genome.calculateOutput(new double[] {-10, 10}, function),
                 0.0001);
-
     }
 
     /**
@@ -698,5 +698,75 @@ public class GenomeTest {
         assertEquals(0.4524, g.calculateOutput(new double[] {-2}, f)[0], .0001);
         assertEquals(0.5023, g.calculateOutput(new double[] {3}, f)[0], .0001);
         assertEquals(0.4973, g.calculateOutput(new double[] {3}, f)[0], .0001);
+    }
+
+    @Test
+    public void rawOutputTest0 () {
+        Node n0 = new Node(0, Node.Type.INPUT);
+        Node n1 = new Node(1, Node.Type.OUTPUT);
+        Connection c0 = new Connection(0, 0, 1, 5);
+        Genome g = new Genome().addNodes(n0, n1).addConnections(c0);
+        ActivationFunction f = new SigmoidActivationFunction();
+
+        assertArrayEquals(new double[] {0}, g.calculateRawOutput(new double[] {-10}, f),
+                0.00001);
+        assertArrayEquals(new double[] {0.39719}, g.calculateRawOutput(new double[] {-0.5}, f),
+                0.00001);
+        assertArrayEquals(new double[] {1.36445}, g.calculateRawOutput(new double[] {-0.2}, f),
+                0.00001);
+        assertArrayEquals(new double[] {2.5}, g.calculateRawOutput(new double[] {0}, f),
+                0.00001);
+        assertArrayEquals(new double[] {3.63554}, g.calculateRawOutput(new double[] {0.2}, f),
+                0.00001);
+        assertArrayEquals(new double[] {4.60281}, g.calculateRawOutput(new double[] {0.5}, f),
+                0.00001);
+        assertArrayEquals(new double[] {5}, g.calculateRawOutput(new double[] {10}, f),
+                0.00001);
+    }
+
+    @Test
+    public void rawOutputTest1 () {
+        Node n0 = new Node(0, Node.Type.INPUT);
+        Node n1 = new Node(1, Node.Type.OUTPUT);
+        Connection c0 = new Connection(0, 0, 1, .2);
+        Connection c1 = new Connection(1, 1, 0, -.1);
+        Genome g = new Genome().addNodes(n0, n1).addConnections(c0, c1);
+        ActivationFunction f = new SigmoidActivationFunction();
+
+        assertArrayEquals(new double[] {0.18411}, g.calculateRawOutput(new double[] {0.5}, f),
+                0.00001);
+        assertArrayEquals(new double[] {0.17821}, g.calculateRawOutput(new double[] {0.5}, f),
+                0.00001);
+        assertArrayEquals(new double[] {0.04198}, g.calculateRawOutput(new double[] {-0.2}, f),
+                0.00001);
+    }
+
+    @Test
+    public void rawOutputTest2 () {
+        Node n0 = new Node(0, Node.Type.INPUT);
+        Node n1 = new Node(1, Node.Type.INPUT);
+        Node n2 = new Node(2, Node.Type.INPUT);
+        Node n3 = new Node(3, Node.Type.OUTPUT);
+        Node n4 = new Node(4, Node.Type.OUTPUT);
+        Node n5 = new Node(5, Node.Type.OUTPUT);
+        Connection c0 = new Connection(0, 0, 3, 0.1);
+        Connection c1 = new Connection(1, 0, 4, 0.2);
+        Connection c2 = new Connection(2, 0, 5, 0.3);
+        Connection c3 = new Connection(3, 1, 3, 0.4);
+        Connection c4 = new Connection(4, 1, 4, 0.5);
+        Connection c5 = new Connection(5, 1, 5, 0.6);
+        Connection c6 = new Connection(6, 2, 3, 0.7);
+        Connection c7 = new Connection(7, 2, 4, 0.8);
+        Connection c8 = new Connection(8, 2, 5, 0.9);
+        Genome g = new Genome()
+                .addNodes(n0, n1, n2, n3, n4, n5)
+                .addConnections(c0, c1, c2, c3, c4, c5, c6, c7, c8);
+        SigmoidActivationFunction f = new SigmoidActivationFunction();
+        f.logisticGrowthRate = 1;
+
+        assertArrayEquals(new double[] {0.87727, 1.09659, 1.31591},
+                g.calculateRawOutput(new double[] {1, 1, 1}, f), 0.00001);
+        assertArrayEquals(new double[] {0.71052, 0.87522, 1.03993},
+                g.calculateRawOutput(new double[] {-.2, .3, .5}, f), 0.00001);
     }
 }

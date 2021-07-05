@@ -12,7 +12,6 @@ import java.awt.*;
  * Draws a {@link Genome} using {@link javax.swing}.
  *
  * @author tesla
- * @version 1.0
  */
 public class GenomeDrawer {
 

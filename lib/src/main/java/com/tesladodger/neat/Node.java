@@ -14,7 +14,6 @@ import com.tesladodger.neat.utils.functions.ActivationFunction;
  * to: inputs, hidden nodes and outputs.
  *
  * @author tesla
- * @version 1.0
  */
 public class Node implements Cloneable, Comparable<Node> {
 
@@ -44,7 +43,8 @@ public class Node implements Cloneable, Comparable<Node> {
          *
          * <p>No connections between outputs are permitted, except from an output to itself.
          */
-        OUTPUT}
+        OUTPUT
+    }
 
     /** Unique identifier in the genome. */
     private final int id;
@@ -73,13 +73,8 @@ public class Node implements Cloneable, Comparable<Node> {
      *
      * @param id unique identifier for this node;
      * @param type of node;
-     *
-     * @throws IllegalArgumentException if the {@code id} is less than 0;
      */
     public Node (int id, Type type) {
-        if (id < 0) {
-            throw new IllegalArgumentException("Negative IDs aren't permitted: " + id);
-        }
         this.id = id;
         this.type = type;
         if (type == Type.INPUT) {
@@ -100,8 +95,6 @@ public class Node implements Cloneable, Comparable<Node> {
      * @param type of the node;
      * @param layer topological layer, starting at 0 for the inputs and reaching the highest
      *              value at the output nodes;
-     *
-     * @throws IllegalArgumentException if the {@code id} is less than 0;
      */
     public Node (int id, Type type, int layer) {
         this(id, type);

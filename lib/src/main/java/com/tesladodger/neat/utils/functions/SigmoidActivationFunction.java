@@ -5,13 +5,12 @@ package com.tesladodger.neat.utils.functions;
  * Commonly used activation function (it's actually a logistic function, which is a type of
  * sigmoid). The function is:
  *
- * <p>1 / ( 1 + e^( - k * (x-x0) ) )
+ * <p>{@code 1 / ( 1 + e^( -k * (x-x0) ) )}
  *
  * <p>where k is the {@link SigmoidActivationFunction#logisticGrowthRate} and x0 is the
  * {@link SigmoidActivationFunction#offset}. The result ranges [0,1].
  *
  * @author tesla
- * @version 1.0
  */
 public class SigmoidActivationFunction implements ActivationFunction {
 

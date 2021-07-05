@@ -19,7 +19,6 @@ import java.util.Random;
  * reuse them later.
  *
  * @author tesla
- * @version 1.0
  */
 public class Parameters implements Serializable {
 
@@ -121,8 +120,15 @@ public class Parameters implements Serializable {
      *
      * <p>Another option is to decrease this value the closer the system is to a solution,
      * assuming only finer tuning is needed to reach it.
+     *
+     * <p>If {@link Parameters#mutateRecentGenesBias} isn't 0, this is minimum value (the power
+     * at which genes older than {@link Parameters#mutateRecentGenesAgeCutoff} are mutated.
+     *
+     * @see Parameters#mutateRecentGenesBias
+     * @see Parameters#mutateRecentGenesSizeThreshold
+     * @see Parameters#mutateRecentGenesAgeCutoff
      */
-    public double weightMutationPower = 1.0;
+    public double weightMutationPower = 0.8;
 
     /** When assigning a new random weight to a connection, this is the minimum value. */
     public double weightLowerBound = -10;
@@ -131,20 +137,44 @@ public class Parameters implements Serializable {
     public double weightUpperBound = 10;
 
     /**
-     * Still unimplemented TODO
+     * When mutating the weights of a genome, bias towards more recent genes (higher innovation
+     * number).
      *
-     * <p>When mutating the weights of a genome, bias towards more recent genes (higher
-     * innovation number).
+     * <p>If the gene is younger than the cutoff value, the actual mutation power will calculated
+     * using a parabola {@code f(x) = ax^2 + b} where:
+     *
+     * <p>{@code f(0) = mutationPower + bias;}
+     *
+     * <p>{@code f(cutoff) = mutationPower;}
+     *
+     * <p>A bias of 0 means all genes are mutated according to the mutation power, irrespective
+     * of age. Negative biases mean younger genes will be mutated to a smaller degree than older
+     * ones, which doesn't make much sense.
+     *
+     * @see Parameters#mutateRecentGenesSizeThreshold
+     * @see Parameters#mutateRecentGenesAgeCutoff
+     * @since v1.1
      */
-    public double mutateRecentGenesBias = 0;
+    public double mutateRecentGenesBias = 0.05;
 
     /**
-     * Still unimplemented TODO
-     *
-     * <p>Only apply {@link Parameters#mutateRecentGenesBias} to genomes with an equal or larger
+     * Only apply {@link Parameters#mutateRecentGenesBias} to genomes with an equal or larger
      * number of connections than this value.
+     *
+     * @since v1.1
      */
-    public int mutateRecentGenesThreshold = 10;
+    public int mutateRecentGenesSizeThreshold = 10;
+
+    /**
+     * Only apply {@link Parameters#mutateRecentGenesBias} genes younger than this value.
+     *
+     * <p>Older genes will be mutated according to {@link Parameters#weightMutationPower}.
+     *
+     * <p>A value of less than 1 means no genes will be biased.
+     *
+     * @since v1.1
+     */
+    public int mutateRecentGenesAgeCutoff = 5;
 
     /*
      * Genome parameters.

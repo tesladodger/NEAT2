@@ -9,7 +9,6 @@ package com.tesladodger.neat.utils.exceptions;
  * this exception will be called.
  *
  * @author tesla
- * @version 1.0
  */
 public class IllegalTopologyException extends RuntimeException {
 

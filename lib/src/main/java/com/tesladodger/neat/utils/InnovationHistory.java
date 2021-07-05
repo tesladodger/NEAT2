@@ -5,6 +5,7 @@ import com.tesladodger.neat.Node;
 import com.tesladodger.neat.GenomeBuilder;
 
 import java.util.HashMap;
+import java.util.List;
 
 
 /**
@@ -23,21 +24,20 @@ import java.util.HashMap;
  * inputs actually make sense given the topology is of the responsibility of the client.
  *
  * @author tesla
- * @version 1.0
  */
 public class InnovationHistory {
 
     /**
-     * Map from {@link NewNodeMutation}, which represents a mutation, and the integer id that was
-     * assigned to the new {@link Node}.
+     * Map that represents new node mutations. The key is the innovation number of the connection
+     * that was broken up by the mutation. The value is the id of the node.
      */
-    private final HashMap<Integer, NewNodeMutation> newNodeMutations = new HashMap<>();
+    private final HashMap<Integer, Integer> newNodeMutations;
 
     /**
-     * Map from {@link NewConnectionMutation}, which represents a mutation, and the integer
-     * innovation number that was assigned to the new connection.
+     * Map that represents new connection mutations. The key is a {@link ConnectionMutationKey},
+     * which consists of the ids of the involved nodes.
      */
-    private final HashMap<ConnectionMutationKey, NewConnectionMutation> newConnectionMutations = new HashMap<>();
+    private final HashMap<ConnectionMutationKey, NewConnectionMutation> newConnectionMutations;
 
     /** Highest node id given so far. */
     private int nodeIdCounter;
@@ -54,6 +54,10 @@ public class InnovationHistory {
      */
     private int lastReturnedInnovationNumber;
 
+    /**
+     * Number of generations of mutations present in this history. Incremented by
+     * {@link InnovationHistory#incrementConnectionAges()}.
+     */
     private int generationCounter;
 
     /**
@@ -74,8 +78,10 @@ public class InnovationHistory {
      * @param initialHighestInnovationNumber highest innovation number of the starting topology;
      */
     public InnovationHistory (int initialHighestNodeId, int initialHighestInnovationNumber) {
-        nodeIdCounter = initialHighestNodeId;
-        innovationNumberCounter = initialHighestInnovationNumber;
+        setInitialHighestNodeId(initialHighestNodeId);
+        setInitialHighestInnovationNumber(initialHighestInnovationNumber);
+        newNodeMutations = new HashMap<>();
+        newConnectionMutations = new HashMap<>();
         lastReturnedNodeId = -1;
         lastReturnedInnovationNumber = -1;
         generationCounter = 0;
@@ -105,6 +111,9 @@ public class InnovationHistory {
      * {@link Node#getId()} of the new node. If the mutation has occurred before, the number
      * returned is that of the node it represents.
      *
+     * <p>A node mutation is identified by the innovation number of the connection it has broken
+     * up.
+     *
      * @param connectionInnovationNumber {@link Connection#getInnovationNumber()} of the
      *                                   connection that was broken-up by the new node;
      *
@@ -113,14 +122,18 @@ public class InnovationHistory {
     public int getNewNodeMutationId (int connectionInnovationNumber) {
         return lastReturnedNodeId = newNodeMutations.computeIfAbsent(
                 connectionInnovationNumber,
-                k -> new NewNodeMutation(++nodeIdCounter)
-        ).nodeId;
+                k -> ++nodeIdCounter
+        );
     }
 
     /**
      * When a new connection mutation occurs, this method is called to determine the
      * {@link Connection#getInnovationNumber()} of the new connection. If the mutation has
      * occurred before, the number returned is that of the connection it represents.
+     *
+     * <p>A connection mutation is identified by the the node ids of the connected nodes. The
+     * order is important, to distinguish recursive from normal connections: a connection from
+     * node 3 to node 5 should never have the same innovation number has a connection from 5 to 3.
      *
      * @param inNodeId {@link Node#getId()} of the in-node;
      * @param outNodeId {@link Node#getId()} of the out-node;
@@ -139,6 +152,12 @@ public class InnovationHistory {
      *
      * <p>The age should be incremented after every generation, since it represents the number of
      * generations a mutation has existed for.
+     *
+     * <p>The method
+     * {@link com.tesladodger.neat.Population#nextGeneration(List, InnovationHistory)} already
+     * calls this method.
+     *
+     * @since v1.1
      */
     public void incrementConnectionAges () {
         generationCounter++;
@@ -156,6 +175,7 @@ public class InnovationHistory {
      * @param outNodeId id of the connection's output node;
      *
      * @return age of the connection;
+     * @since v1.1
      */
     public int getConnectionAge (int inNodeId, int outNodeId) {
         ConnectionMutationKey k = new ConnectionMutationKey(inNodeId, outNodeId);
@@ -167,11 +187,11 @@ public class InnovationHistory {
      * Delete all history and reset the IDs to the given values.
      *
      * @param initialHighestNodeId highest node id of the starting topology;
-     * @param initialHighestInnovationNumber highest innovation number of the starting topology;r
+     * @param initialHighestInnovationNumber highest innovation number of the starting topology;
      */
     public void reset (int initialHighestNodeId, int initialHighestInnovationNumber) {
-        nodeIdCounter = initialHighestNodeId;
-        innovationNumberCounter = initialHighestInnovationNumber;
+        setInitialHighestNodeId(initialHighestNodeId);
+        setInitialHighestInnovationNumber(initialHighestInnovationNumber);
         generationCounter = 0;
         newNodeMutations.clear();
         newConnectionMutations.clear();
@@ -224,27 +244,17 @@ public class InnovationHistory {
     }
 
     /**
-     * Represents a mutation of insertion of a node, represented by the resulting node id.
-     */
-    private static class NewNodeMutation {
-
-        private final int nodeId;
-
-        private NewNodeMutation (int nodeId) {
-            this.nodeId = nodeId;
-        }
-    }
-
-    /**
      * Key used to identify connection mutations, identified by the in and out node ids.
      */
-    private static class ConnectionMutationKey {
+    static class ConnectionMutationKey {
         private final int inNodeId;
         private final int outNodeId;
+        private final int hash;
 
         private ConnectionMutationKey (int inNodeId, int outNodeId) {
             this.inNodeId = inNodeId;
             this.outNodeId = outNodeId;
+            hash = hash(inNodeId, outNodeId);
         }
 
         @Override
@@ -257,10 +267,11 @@ public class InnovationHistory {
 
         @Override
         public int hashCode () {
-            int result = 23;
-            result = result * 37 + inNodeId;
-            result = result * 37 + outNodeId;
-            return result;
+            return hash;
+        }
+
+        private static int hash (int a, int b) {
+            return a ^ ((b << 16) | (b >> 16));
         }
     }
 
@@ -271,9 +282,7 @@ public class InnovationHistory {
      * existed for.
      */
     private static class NewConnectionMutation {
-
         private final int innovationNumber;
-
         private int age;
 
         private NewConnectionMutation (int innovationNumber) {

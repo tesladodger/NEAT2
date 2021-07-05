@@ -23,7 +23,6 @@ import java.util.Random;
  * between genomes is calculated with {@link Genome#compatibilityBetween(Genome, Genome, Parameters)}.
  *
  * @author tesla
- * @version 1.0
  */
 public class Species implements Comparable<Species> {
 
@@ -94,8 +93,7 @@ public class Species implements Comparable<Species> {
     public boolean isCompatible (Genome genome) {
         Objects.requireNonNull(representative, "The representative of this species has not been " +
                 "set.");
-        return Genome.compatibilityBetween(genome, representative, params)
-                <= params.compatibilityThreshold;
+        return Genome.compatibilityBetween(genome, representative, params) <= params.compatibilityThreshold;
     }
 
     /**

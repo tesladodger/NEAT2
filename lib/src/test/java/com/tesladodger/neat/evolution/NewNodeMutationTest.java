@@ -165,7 +165,7 @@ public class NewNodeMutationTest {
      * Test the randomness of the selection of the connection to mutate.
      */
     @RepeatedTest(10)
-    public void randomnessTest () {
+    public void randomnessTest0 () {
         Node n0 = new Node(0, Node.Type.INPUT);
         Node n1 = new Node(1, Node.Type.INPUT);
         Node n2 = new Node(2, Node.Type.INPUT);
@@ -213,9 +213,40 @@ public class NewNodeMutationTest {
         assertEquals(1000, c5Counter, 100);
     }
 
-    // TODO randomness test for recursive cons
+    @Test
+    public void nodeListOrderFixTest () {
+        Node n0 = new Node(0, Node.Type.INPUT);
+        Node n1 = new Node(1, Node.Type.OUTPUT);
+        Node n2 = new Node(2, Node.Type.OUTPUT);
+        Connection c0 = new Connection(0, 0, 1);
+        Connection c1 = new Connection(1, 0, 2);
+        Genome g = new Genome().addNodes(n0, n1, n2).addConnections(c0, c1);
 
-    // TODO layer incrementation fix test
+        Mutation.addNodeMutation(g, c1, new InnovationHistory(2, 1));
 
-    // TODO layer fixing that breaks nodeList order
+        Node[] nodes = g.getNodes().asArray();
+        assertEquals(4, nodes.length);
+
+        assertEquals(0, nodes[0].getId());
+        assertEquals(0, nodes[0].getLayer());
+        assertEquals(3, nodes[1].getId());
+        assertEquals(1, nodes[1].getLayer());
+        assertEquals(1, nodes[2].getId());
+        assertEquals(2, nodes[2].getLayer());
+        assertEquals(2, nodes[3].getId());
+        assertEquals(2, nodes[3].getLayer());
+
+        assertEquals("Genome{\n" +
+                "\tnodes=[" +
+                "Node{id=0, type=INPUT, layer=0}, " +
+                "Node{id=3, type=HIDDEN, layer=1}, " +
+                "Node{id=1, type=OUTPUT, layer=2}, " +
+                "Node{id=2, type=OUTPUT, layer=2}],\n" +
+                "\tconnections=[" +
+                "Connection{innovNum=0, in=0, out=1, weight=0.0, enabled=true}, " +
+                "Connection{innovNum=1, in=0, out=2, weight=0.0, enabled=false}, " +
+                "Connection{innovNum=2, in=0, out=3, weight=1.0, enabled=true}, " +
+                "Connection{innovNum=3, in=3, out=2, weight=0.0, enabled=true}]\n" +
+                "}", g.toString());
+    }
 }

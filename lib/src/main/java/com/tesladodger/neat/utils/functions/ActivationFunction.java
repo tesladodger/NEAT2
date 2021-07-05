@@ -6,7 +6,6 @@ package com.tesladodger.neat.utils.functions;
  * functions are already implemented in this package.
  *
  * @author tesla
- * @version 1.0
  */
 public interface ActivationFunction {
 

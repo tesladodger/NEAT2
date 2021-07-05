@@ -21,7 +21,6 @@ import java.util.concurrent.ThreadLocalRandom;
  * <p>You are advised to start minimally, with only input and output nodes, fully connected.
  *
  * @author tesla
- * @version 1.0
  */
 public class GenomeBuilder {
 

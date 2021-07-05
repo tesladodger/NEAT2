@@ -10,6 +10,6 @@
  * </ul>
  *
  * @author tesla
- * @version 1.0
+ * @since v1.0
  */
 package com.tesladodger.neat.tools;

@@ -67,6 +67,8 @@ public class EvolveXOR {
         Parameters parameters = new Parameters();
         // change the probability of recursive connections to 0
         parameters.recursiveConnectionProbability = 0.0;
+        // don't bias recent genes
+        parameters.mutateRecentGenesBias = 0;
 
         // create a population using the template genome
         Population population = new Population(parameters);

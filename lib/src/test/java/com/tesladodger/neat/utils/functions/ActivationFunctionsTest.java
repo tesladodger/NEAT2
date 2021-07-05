@@ -59,6 +59,26 @@ public class ActivationFunctionsTest {
         return generateStream(inputs, outputs, f, 0.0);
     }
 
+    @TestFactory
+    public Stream<DynamicTest> softplusTest0 () {
+        List<Double> inputs = Arrays.asList(-10.0, -5.0, -2.0, -1.0, -.5, -.2, -0.01, 0.0, .1,
+                .5, 3.0, 4.0, 10.0);
+        List<Double> outputs = Arrays.asList(.00005, 0.00671, 0.12692, 0.31326, 0.47408, 0.59814,
+                0.68816, 0.69315, 0.74440, 0.97408, 3.04859, 4.01815, 10.00005);
+        ActivationFunction f = new SoftplusActivationFunction();
+        return generateStream(inputs, outputs, f, 0.00001);
+    }
+
+    @TestFactory
+    public Stream<DynamicTest> softplusTest1 () {
+        List<Double> inputs = Arrays.asList(-10.0, -5.0, -1.0, -.5, -.2, 0.0, .2, 1.0, 5.0, 10.0);
+        List<Double> outputs = Arrays.asList(0.0, 0.0, 0.00454, 0.03173, 0.09278, 0.17329,
+                0.29278, 1.00454, 5.0, 10.0);
+        SoftplusActivationFunction f = new SoftplusActivationFunction();
+        f.sharpness = 4.0;
+        return generateStream(inputs, outputs, f, 0.00001);
+    }
+
     // test method reference
     static double passThrough (double value) {
         return value;
