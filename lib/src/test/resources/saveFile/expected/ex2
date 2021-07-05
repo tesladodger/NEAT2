@@ -1,0 +1,10 @@
+<Genome>
+<node id=0 type=INPUT layer=0 />
+<node id=1 type=INPUT layer=0 />
+<node id=3 type=HIDDEN layer=1 />
+<node id=2 type=OUTPUT layer=2 />
+<connection id=0 in=0 out=2 weight=-2.0 enabled=false />
+<connection id=1 in=1 out=2 weight=3.0 enabled=true />
+<connection id=2 in=0 out=3 weight=1.0 enabled=true />
+<connection id=3 in=3 out=2 weight=0.5 enabled=true />
+</Genome>
